@@ -8,7 +8,7 @@ def encode_midi_with_note_events(midi_file_path):
 
     last_velocity = None
     first_note = False
-    interval = 10
+    granularity = 10
 
     for track in midi.tracks:
         for msg in track:
@@ -16,15 +16,15 @@ def encode_midi_with_note_events(midi_file_path):
             time_left = msg.time
             # print("{}: {}".format(msg, time_left))
 
-            while time_left > interval and first_note:
+            while time_left > granularity and first_note:
 
-                if time_left >= interval:
-                    max_shift = (time_left // interval) * interval
-                    encoded_events.append(f'TIME_SHIFT<{max_shift}>')
-                    time_left -= max_shift
+                if time_left >= 1000:
+                    encoded_events.append('TIME_SHIFT<1000>')
+                    time_left -= 1000
                 else:
-                    encoded_events.append(f'TIME_SHIFT<{time_left}>')
-                    time_left = 0
+                    rounded_time = (time_left // granularity) * granularity
+                    encoded_events.append(f'TIME_SHIFT<{rounded_time}>')
+                    time_left -= rounded_time
 
 
             if msg.type == 'note_on' and msg.velocity > 0:
