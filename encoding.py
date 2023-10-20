@@ -1,5 +1,8 @@
 import mido
 from mido import MidiFile, MidiTrack, Message
+import os
+import json
+import copy
 
 
 def encode_midi_with_note_events(midi_file_path):
@@ -70,9 +73,41 @@ def decode_events_to_midi(encoded_events, output_midi_path):
     midi.save(output_midi_path)
 
 
-encoded = encode_midi_with_note_events('muse.mid')
-encoding_set = {s for s in encoded}
-print(encoding_set)
-print(len(encoding_set))
-# print(encoded)
-decode_events_to_midi(encoded, 'output_midi_file_restored.mid')
+def split_into_groups(lst, size):
+    if len(lst) < size:
+        return [lst]
+    else:
+        chunks = [lst[i:i + size] for i in range(0, len(lst) - size, size)]
+        chunks.append(lst[-size:])
+        return chunks
+
+
+directory_path = 'output'
+dataset = {
+    "tokens": [],
+}
+vocab = set()
+for num, filename in enumerate(os.listdir(directory_path)):
+    print(num)
+    if filename.endswith(".midi") or filename.endswith(".mid"):
+
+        filepath = os.path.join(directory_path, filename)
+        tokens = encode_midi_with_note_events(filepath)
+        token_set = {token for token in tokens}
+        vocab = vocab.union(token_set)
+
+        dataset["tokens"].extend(split_into_groups(tokens, 1000))
+
+
+token2id = {token: i for i, token in enumerate(vocab)}
+id2token = {i: token for token, i in token2id.items()}
+
+dataset["encodings"] = copy.deepcopy(dataset["tokens"])
+for idx, tokens in enumerate(dataset["tokens"]):
+    dataset["encodings"][idx] = [token2id[token] for token in tokens]
+
+dataset["token2id"] = token2id
+dataset["id2token"] = id2token
+
+with open('dataset.json', 'w+') as f:
+    json.dump(dataset, f)
