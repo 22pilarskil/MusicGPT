@@ -22,7 +22,7 @@ class MusicTransformer(nn.Module):
         self.pos_embedding = RelativePositionalEmbedding(embed_dim, max_length)
 
         self.transformer = nn.Transformer(
-            d_model=embed_dim, nhead=num_heads, num_layers=num_layers
+            d_model=embed_dim, nhead=num_heads, num_encoder_layers=num_layers  # Use num_encoder_layers
         )
 
         self.fc = nn.Linear(embed_dim, vocab_size)
