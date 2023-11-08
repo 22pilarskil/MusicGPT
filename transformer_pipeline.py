@@ -142,8 +142,10 @@ if __name__ == '__main__':
         total_loss = 0
         for encoding in encodings:
             optimizer.zero_grad()
-            inputs = torch.tensor(encoding[:-1]).unsqueeze(0).to(device)
-            targets = torch.tensor(encoding[1:]).unsqueeze(0).to(device)
+
+            half_len = len(encoding) // 2
+            inputs = torch.tensor(encoding[:half_len]).unsqueeze(0).to(device)
+            targets = torch.tensor(encoding[half_len:]).unsqueeze(0).to(device)
 
             outputs = model(inputs).transpose(0, 1)
             loss = criterion(outputs.reshape(-1, vocab_size), targets.reshape(-1))
