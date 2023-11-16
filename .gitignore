@@ -1,1 +1,7 @@
 output/
+*.midi
+*.mid
+*.pkl
+*.pickle
+*.json
+midi_processor/
